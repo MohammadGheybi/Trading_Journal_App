@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 8.6%;
+    --foreground: 48 14% 94%;
+    --card: 0 0% 11.8%;
+    --card-foreground: 48 14% 94%;
+    --popover: 0 0% 14.5%;
+    --popover-foreground: 48 14% 94%;
+    --primary: 349 100% 22%;
+    --primary-foreground: 48 14% 94%;
+    --secondary: 0 0% 14.5%;
+    --secondary-foreground: 48 14% 94%;
+    --muted: 0 0% 14.5%;
+    --muted-foreground: 40 6% 68%;
+    --accent: 0 0% 17%;
+    --accent-foreground: 48 14% 94%;
+    --destructive: 0 66% 65%;
+    --destructive-foreground: 0 0% 9%;
+    --border: 30 8% 20%;
+    --input: 30 8% 24%;
+    --ring: 350 58% 56%;
+    --chart-1: 142 22% 54%;
+    --chart-2: 0 66% 65%;
+    --chart-3: 28 32% 57%;
+    --chart-4: 349 100% 22%;
+    --chart-5: 48 14% 94%;
+    --radius: 0.875rem;
+    --font-heading: "Fraunces", Georgia, serif;
+    --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    --font-display: "Fraunces", Georgia, serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sidebar-background: 0 0% 8.6%;
+    --sidebar-foreground: 48 14% 94%;
+    --sidebar-primary: 349 100% 22%;
+    --sidebar-primary-foreground: 48 14% 94%;
+    --sidebar-accent: 0 0% 14.5%;
+    --sidebar-accent-foreground: 48 14% 94%;
+    --sidebar-border: 30 8% 18%;
+    --sidebar-ring: 350 58% 56%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html { color-scheme: dark; }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+  .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  @media print {
+    @page { size: A4 landscape; margin: 8mm; }
+    html, body, #root { background: #161616 !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    .print-sheet { width: 100%; max-height: 190mm; overflow: hidden; }
+  }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none { scrollbar-width: none; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #2e2e2e; border-radius: 999px; border: 2px solid #161616; }
+  ::-webkit-scrollbar-track { background: transparent; }
+}
