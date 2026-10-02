@@ -41,3 +41,4 @@ dist-ssr
 .env
 .vite
 base44/.app.jsonc
+.xlsx

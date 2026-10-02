@@ -9,6 +9,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawn } from 'node:child_process';
 import express from 'express';
 import multer from 'multer';
 import { randomUUID } from 'node:crypto';
@@ -28,7 +29,30 @@ import {
 const port = Number(process.env.PORT) || 3001;
 const host = '127.0.0.1';
 const serveUi = process.argv.includes('--serve-ui');
+const desktop = process.argv.includes('--desktop');
 const distDir = path.resolve(import.meta.dirname, '../dist');
+const clients = new Map();
+let exitTimer = null;
+
+function pruneClients() {
+  const now = Date.now();
+  for (const [id, seen] of clients) {
+    if (now - seen > 5 * 60 * 1000) clients.delete(id);
+  }
+}
+
+function armExit(delay) {
+  if (!desktop || exitTimer) return;
+  exitTimer = setTimeout(() => {
+    exitTimer = null;
+    pruneClients();
+    if (clients.size === 0) process.exit(0);
+  }, delay);
+}
+
+function openBrowser(url) {
+  spawn('cmd.exe', ['/c', 'start', '', url], { detached: true, stdio: 'ignore', windowsHide: true }).unref();
+}
 
 const ALLOWED = new Map([
   ['image/jpeg', '.jpg'],
@@ -55,6 +79,23 @@ app.use(express.json({ limit: '5mb' }));
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, dataDir });
+});
+
+app.post('/api/presence', (req, res) => {
+  const id = String(req.body?.id || '').slice(0, 80);
+  if (id) clients.set(id, Date.now());
+  if (exitTimer) {
+    clearTimeout(exitTimer);
+    exitTimer = null;
+  }
+  res.json({ ok: true });
+});
+
+app.post('/api/leave', (req, res) => {
+  const id = String(req.query.id || '').slice(0, 80);
+  if (id) clients.delete(id);
+  res.json({ ok: true });
+  if (clients.size === 0) armExit(4000);
 });
 
 app.get('/api/state', (req, res) => {
@@ -121,6 +162,14 @@ const server = app.listen(port, host, () => {
   const ui = serveUi ? `http://${host}:${port}` : `http://${host}:5173  (API http://${host}:${port})`;
   console.log(`Crimson Ledger is ready at ${ui}`);
   console.log(`Database: ${path.join(dataDir, 'journal.sqlite')}`);
+  if (desktop) {
+    if (!process.env.CRIMSON_NO_OPEN) openBrowser(`http://${host}:${port}/`);
+    armExit(45000);
+    setInterval(() => {
+      pruneClients();
+      if (clients.size === 0) armExit(1000);
+    }, 60000);
+  }
 });
 
 server.on('error', (error) => {
